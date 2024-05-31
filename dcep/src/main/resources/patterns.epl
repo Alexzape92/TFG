@@ -1,0 +1,9 @@
+@public @buseventtype create json schema HospitalFridgeTemp(timestamp long, sensorId string, value double, unit string);
+
+@Name('HospitalFridgeHighTemp')
+insert into HospitalFridgeHighTemp
+select * from HospitalFridgeTemp((value>7.0 and unit="C") or (value>280.0 and unit="K"));
+
+@Name('HospitalFridgeLowTemp')
+insert into HospitalFridgeLowTemp
+select * from HospitalFridgeTemp((value<0.0 and unit="C") or (value<273.0 and unit="K"));
