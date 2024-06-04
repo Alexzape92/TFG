@@ -4,13 +4,15 @@ import random
 import time
 import json
 
+# Kafka config
 config = {
     'bootstrap.servers': 'localhost:9092',
     'client.id': socket.gethostname()
 }
 producer = Producer(config)
 
-nEventsToSend = 100
+# Events simulation config
+nEventsToSend = 20 # number of events to send of each event type
 simpleEventsSchema = {
     'HospitalFridgeTemp': {
         'value': {
