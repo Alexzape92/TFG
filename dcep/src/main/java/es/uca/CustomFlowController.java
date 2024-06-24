@@ -27,8 +27,8 @@ public class CustomFlowController implements EsperIOKafkaOutputFlowController {
 
         String[] deploymentIds = runtime.getDeploymentService().getDeployments();
         for (String depoymentId : deploymentIds) {
-            for (EPStatement statement : context.getRuntime().getDeploymentService().getDeployment(depoymentId)
-                    .getStatements()) {
+            for (EPStatement statement : context.getRuntime().getDeploymentService()
+                    .getDeployment(depoymentId).getStatements()) {
                 if (statement != null) {
                     statement.addListener(
                             new KafkaListener(producer, statement.getName()));

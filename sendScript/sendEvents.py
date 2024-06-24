@@ -6,7 +6,7 @@ import json
 
 # Kafka config
 config = {
-    'bootstrap.servers': 'localhost:9092',
+    'bootstrap.servers': '217.216.203.39:9092',
     'client.id': socket.gethostname()
 }
 producer = Producer(config)
@@ -15,6 +15,13 @@ producer = Producer(config)
 nEventsToSend = 20 # number of events to send of each event type
 simpleEventsSchema = {
     'HospitalFridgeTemp': {
+        'value': {
+            'min': -4,
+            'max': 10
+        },
+        'unit': 'C'
+    },
+    'HospitalLabTemp': {
         'value': {
             'min': -4,
             'max': 10

@@ -1,13 +1,16 @@
 package es.uca;
 
-import java.nio.charset.StandardCharsets;
+import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -29,25 +32,28 @@ import com.espertech.esperio.kafka.EsperIOKafkaInputAdapterPlugin;
 import com.espertech.esperio.kafka.EsperIOKafkaInputSubscriberByTopicList;
 import com.espertech.esperio.kafka.EsperIOKafkaOutputAdapterPlugin;
 import com.espertech.esperio.kafka.KafkaOutputDefault;
-import com.google.common.io.Resources;
 
 public class App {
-    private static String brokerIp = "127.0.0.1:9092";
+    private static String brokerIp;
 
     private static Configuration configuration;
-    public static String[] simpleEventTypes = { "HospitalFridgeTemp" };
+    public static String[] simpleEventTypes;
 
     public static void main(String[] args) {
-        setConfiguration();
-
         try {
-            String patterns = Resources.toString(Resources.getResource("patterns.epl"), StandardCharsets.UTF_8);
+            Properties props = new Properties();
+            props.load(new FileInputStream("config/dcep.properties"));
+            brokerIp = props.getProperty("brokerIp");
+            simpleEventTypes = props.getProperty("simpleEventTypes").split(",");
+            setConfiguration();
+
+            String patterns = new String(Files.readAllBytes(Paths.get("config/patterns.epl")));
             compileAndDeploy(patterns);
+
+            while (true) {
+            }
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
-        }
-
-        while (true) {
         }
     }
 
@@ -64,7 +70,9 @@ public class App {
 
         // Create input topics if it doesn't exist
         try {
-            AdminClient admin = AdminClient.create(props);
+            Properties adminProps = new Properties();
+            adminProps.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, brokerIp);
+            Admin admin = Admin.create(adminProps);
             Set<String> topics = admin.listTopics().names().get();
             for (String topic : simpleEventTypes) {
                 if (!topics.contains(topic)) {
@@ -90,7 +98,7 @@ public class App {
         props.put(EsperIOKafkaConfig.INPUT_PROCESSOR_CONFIG, CustomJsonProcessor.class.getName());
 
         // Kafka Producer Properties
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerIp);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
