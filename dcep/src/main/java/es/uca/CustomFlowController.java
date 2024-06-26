@@ -31,7 +31,7 @@ public class CustomFlowController implements EsperIOKafkaOutputFlowController {
                     .getDeployment(depoymentId).getStatements()) {
                 if (statement != null) {
                     statement.addListener(
-                            new KafkaListener(producer, statement.getName()));
+                            new KafkaListener(producer, statement.getEventType().getName()));
                 }
             }
         }
@@ -40,7 +40,7 @@ public class CustomFlowController implements EsperIOKafkaOutputFlowController {
             public void onDeployment(DeploymentStateEventDeployed event) {
                 for (EPStatement statement : event.getStatements()) {
                     statement.addListener(
-                            new KafkaListener(producer, statement.getName()));
+                            new KafkaListener(producer, statement.getEventType().getName()));
                 }
             }
 
